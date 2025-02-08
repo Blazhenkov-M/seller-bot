@@ -18,7 +18,7 @@ storage = RedisStorage.from_url("redis://localhost:6379")
 async def main():
     logger.info("Starting bot. . .")
 
-#    await initialize_data()
+    await initialize_data()
     dp = Dispatcher(storage=storage)
     dp.include_routers(start.start_router, pay.pay_router, load_report.load_router,
                        admin.admin, super_admin.super_admin)
