@@ -13,6 +13,12 @@ services:
       - "5434:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
 
   redis:
     image: redis:latest
@@ -20,18 +26,23 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   app:
     build: .
     container_name: seller_bot_app
     restart: always
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     env_file:
       - .env
-    ports:
-      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head && python app/main.py"
 
 volumes:
   pg_data:
+  redis_data:
