@@ -2,9 +2,9 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment
 
-from core.bot_instance import bot
-from keyboards.start import pay_kb, load_xl_kb
-from texts import START_PAY_MSG
+from app.core.bot_instance import bot
+from app.keyboards.start import pay_kb, load_xl_kb
+from app.texts import START_PAY_MSG
 pay_router = Router()
 
 #  live_ORehkMOxK1kZmrW9ZzIlugIzIrT6devepT0bThyEz_k

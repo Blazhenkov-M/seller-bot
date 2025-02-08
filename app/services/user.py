@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
-from database.models import User
+from app.database.models import User
 
-from settings.logger_config import get_logger
+from app.settings.logger_config import get_logger
 logger = get_logger(__name__)
 
 

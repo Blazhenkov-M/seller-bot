@@ -3,7 +3,7 @@ from app.database.models import Price, Message
 from sqlalchemy.future import select
 
 
-from settings.logger_config import get_logger
+from app.settings.logger_config import get_logger
 logger = get_logger(__name__)
 
 

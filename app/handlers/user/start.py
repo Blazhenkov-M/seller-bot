@@ -3,11 +3,11 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from database.database import async_session
-from services.user import add_user
+from app.database.database import async_session
+from app.services.user import add_user
 
-from keyboards.start import start_kb
-from texts import START_MSG
+from app.keyboards.start import start_kb
+from app.texts import START_MSG
 start_router = Router()
 
 

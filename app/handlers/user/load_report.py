@@ -2,9 +2,9 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from keyboards.start import load_xl_kb
-from texts import REPORT_UPLOAD_MSG
-from states import ReportStates
+from app.keyboards.start import load_xl_kb
+from app.texts import REPORT_UPLOAD_MSG
+from app.states import ReportStates
 load_router = Router()
 
 
