@@ -14,6 +14,18 @@ class User(Base):
     expenses = relationship("Expense", back_populates="user")
     orders = relationship("Order", back_populates="user")
     admin = relationship("Admin", back_populates="user", uselist=False)
+    subscription = relationship("Subscription", back_populates="user", uselist=False)  # Добавляем связь
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.tg_id", ondelete="CASCADE"), unique=True)
+    status: Mapped[bool] = mapped_column(Boolean, default=False)  # Активна или нет
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)  # Когда закончится подписка
+
+    user = relationship("User", back_populates="subscription")
 
 
 class Admin(Base):

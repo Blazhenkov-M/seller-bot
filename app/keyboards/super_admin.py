@@ -24,3 +24,7 @@ cancel_send_all = InlineKeyboardMarkup(inline_keyboard=[
 edit_texts_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="start", callback_data="edit_text_start")],
     [InlineKeyboardButton(text="load_report", callback_data="edit_text_load_report")]])
+
+stats_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Конверсия", callback_data="conversion")],
+    [InlineKeyboardButton(text="Список пользователей", callback_data="get_all_users")]])
