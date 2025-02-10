@@ -19,3 +19,11 @@ class Newsletter(StatesGroup):
     message = State()
 
 
+class EditPriceState(StatesGroup):
+    subscription = State()
+    consultation = State()
+
+class EditMessageState(StatesGroup):
+    start = State()
+    load_report = State()
+
