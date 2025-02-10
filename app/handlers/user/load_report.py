@@ -2,8 +2,9 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
+from app.database.database import async_session
 from app.keyboards.start import load_xl_kb
-from app.texts import REPORT_UPLOAD_MSG
+from app.services.get_texts import get_text
 from app.states import ReportStates
 load_router = Router()
 
@@ -15,7 +16,10 @@ async def trigger_upload(msg: Message):
 
 @load_router.callback_query(F.data == "load_report")
 async def load_report(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer(REPORT_UPLOAD_MSG)
+    async with async_session() as session:
+        report_msg = await get_text(session, "load_report")  # Загружаем текст из БД
+
+    await callback.message.answer(report_msg)
     await state.set_state(ReportStates.waiting_for_file)  # FSM переходит в состояние ожидания файла
 
 

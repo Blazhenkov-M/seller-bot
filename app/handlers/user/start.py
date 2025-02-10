@@ -7,7 +7,7 @@ from app.database.database import async_session
 from app.services.user import add_user
 
 from app.keyboards.start import start_kb
-from app.texts import START_MSG
+from app.services.get_texts import get_text
 start_router = Router()
 
 
@@ -18,6 +18,7 @@ async def cmd_start(message: Message, state: FSMContext):
 
     async with async_session() as session:
         await add_user(tg_id=tg_id, username=username, session=session)
+        start_msg = await get_text(session, "start")  # Загружаем текст из БД
 
-    await message.answer(START_MSG, reply_markup=start_kb)
+    await message.answer(start_msg, reply_markup=start_kb)
     await state.clear()
