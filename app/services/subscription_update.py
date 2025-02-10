@@ -2,6 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime, timedelta
 
+from app.database.models import Subscription
+
 
 async def update_subscription_status(user_id: int, session: AsyncSession, days: int = 30):
     """Обновляет или создаёт подписку для пользователя после оплаты."""

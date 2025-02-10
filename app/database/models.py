@@ -14,7 +14,7 @@ class User(Base):
     expenses = relationship("Expense", back_populates="user")
     orders = relationship("Order", back_populates="user")
     admin = relationship("Admin", back_populates="user", uselist=False)
-    subscription = relationship("Subscription", back_populates="user", uselist=False)  # Добавляем связь
+    subscription = relationship("Subscription", back_populates="user", uselist=False)
 
 
 class Subscription(Base):
@@ -70,7 +70,7 @@ class Expense(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.tg_id', ondelete="CASCADE"))
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id', ondelete="CASCADE"))  # Привязка к заказу
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id', ondelete="CASCADE"))
     salaries: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     advertising: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     warehouse_rent: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
