@@ -7,20 +7,20 @@ from app.database.models import Subscription
 
 async def update_subscription_status(user_id: int, session: AsyncSession, days: int = 30):
     """Обновляет или создаёт подписку для пользователя после оплаты."""
+    async with session.begin():  # Безопасный контекстный менеджер для транзакции
+        result = await session.execute(select(Subscription).where(Subscription.user_id == user_id))
+        subscription = result.scalars().first()
 
-    # Ищем текущую подписку
-    result = await session.execute(select(Subscription).where(Subscription.user_id == user_id))
-    subscription = result.scalars().first()
+        now = datetime.utcnow()
 
-    new_expiry = datetime.utcnow() + timedelta(days=days)  # Добавляем дни
-
-    if subscription:
-        # Обновляем подписку
-        subscription.status = True
-        subscription.expires_at = new_expiry
-    else:
-        # Создаём подписку
-        subscription = Subscription(user_id=user_id, status=True, expires_at=new_expiry)
-        session.add(subscription)
-
-    await session.commit()
+        if subscription:
+            # Если подписка уже активна и срок не истёк, добавляем дни к expires_at
+            if subscription.expires_at and subscription.expires_at > now:
+                subscription.expires_at += timedelta(days=days)
+            else:
+                subscription.expires_at = now + timedelta(days=days)
+            subscription.status = True
+        else:
+            # Создаём новую подписку
+            subscription = Subscription(user_id=user_id, status=True, expires_at=now + timedelta(days=days))
+            session.add(subscription)
