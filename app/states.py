@@ -13,3 +13,9 @@ class AddAdminState(StatesGroup):
 
 class RemoveAdminState(StatesGroup):
     waiting_for_username = State()
+
+
+class Newsletter(StatesGroup):
+    message = State()
+
+

@@ -18,3 +18,5 @@ prices_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Подписка месяц", callback_data="subscribe_month_price")],
     [InlineKeyboardButton(text="Консультация", callback_data="consultation_price")]])
 
+cancel_send_all = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Отмена рассылки', callback_data='cancel_send_all')]])
