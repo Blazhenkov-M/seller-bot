@@ -9,6 +9,10 @@ pay_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Далее", callback_data="payment_start")]
 ])
 
+get_pay_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Оплатить", callback_data="payment_start")]
+])
+
 load_xl_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="📎 Загрузить", callback_data="load_report")]
 ])

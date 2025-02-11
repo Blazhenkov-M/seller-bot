@@ -3,6 +3,7 @@ from celery import Celery
 from app.database.database import AsyncSession
 from app.database.models import User
 from app.core.bot_instance import bot
+from app.keyboards.user import get_pay_kb
 
 celery = Celery("tasks", broker="redis://localhost:6379/1")
 
@@ -15,4 +16,5 @@ def notify_users_about_subscription():
 
         for user in users:
             bot.send_message(user.tg_id, "Ваша подписка заканчивается через 3 дня\n\n"
-                                         "Нажмите кнопку «Оплатить», чтобы подлить подписку 👇🏻")
+                                         "Нажмите кнопку «Оплатить», чтобы подлить подписку 👇🏻",
+                             reply_markup=get_pay_kb)
