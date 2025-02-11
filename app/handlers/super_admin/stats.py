@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery
 
 from app.filters.admin_protect import AdminProtect
-from app.keyboards.super_admin import stats_kb
+from app.keyboards.s_admin import stats_kb
 
 from app.database.database import async_session
 from app.services.stats import get_all_usernames

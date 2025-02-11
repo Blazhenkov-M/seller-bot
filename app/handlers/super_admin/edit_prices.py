@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from app.filters.admin_protect import AdminProtect
-from app.keyboards.super_admin import prices_kb
+from app.keyboards.s_admin import prices_kb
 
 from app.database.database import async_session
 from app.services.edit_prices import get_prices, update_price

@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from app.filters.admin_protect import AdminProtect
 from app.states import Newsletter
 from app.services.newsletter import get_users
-from app.keyboards.super_admin import cancel_send_all
+from app.keyboards.s_admin import cancel_send_all
 from app.database.database import async_session
 from app.core.bot_instance import bot
 

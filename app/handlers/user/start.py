@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from app.database.database import async_session
 from app.services.add_user import add_user
 
-from app.keyboards.start import start_kb
+from app.keyboards.user import start_kb
 from app.services.get_texts import get_text
 start_router = Router()
 

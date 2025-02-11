@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from app.states import AddAdminState, RemoveAdminState
 from app.filters.admin_protect import AdminProtect
-from app.keyboards.super_admin import admins_edit_kb
+from app.keyboards.s_admin import admins_edit_kb
 
 from app.database.database import async_session
 from app.services.edit_admins import get_admins_list, add_admin, remove_admin

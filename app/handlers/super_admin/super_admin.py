@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from app.filters.admin_protect import AdminProtect
-from app.keyboards.super_admin import super_admin_kb
+from app.keyboards.s_admin import super_admin_kb
 
 s_admin = Router()
 

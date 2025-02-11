@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from app.filters.admin_protect import AdminProtect
-from app.keyboards.super_admin import edit_texts_kb
+from app.keyboards.s_admin import edit_texts_kb
 
 from app.database.database import async_session
 from app.services.edit_texts import update_message_content

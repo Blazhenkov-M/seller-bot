@@ -14,4 +14,5 @@ def notify_users_about_subscription():
         users = session.query(User).filter(User.subscription_expiry == threshold_date).all()
 
         for user in users:
-            bot.send_message(user.tg_id, "⚠️ Твоя подписка заканчивается через 3 дня! Не забудь продлить.")
+            bot.send_message(user.tg_id, "Ваша подписка заканчивается через 3 дня\n\n"
+                                         "Нажмите кнопку «Оплатить», чтобы подлить подписку 👇🏻")

@@ -3,15 +3,9 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from app.database.database import async_session
-from app.keyboards.start import load_xl_kb
 from app.services.get_texts import get_text
 from app.states import ReportStates
 load_router = Router()
-
-
-@load_router.message(F.text.lower() == "/upload")
-async def trigger_upload(msg: Message):
-    await msg.answer("Вы можете загрузить отчет, нажав кнопку ниже:", reply_markup=load_xl_kb)
 
 
 @load_router.callback_query(F.data == "load_report")

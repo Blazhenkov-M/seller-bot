@@ -12,3 +12,8 @@ pay_kb = InlineKeyboardMarkup(inline_keyboard=[
 load_xl_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="📎 Загрузить", callback_data="load_report")]
 ])
+
+main_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="📎 Загрузить отчет", callback_data="load_report")],
+    [InlineKeyboardButton(text="🚀 Запрос на консультацию", callback_data="get_cosult")],
+    [InlineKeyboardButton(text="💬 Задать вопрос", url="https://t.me/super_kamila/")]])

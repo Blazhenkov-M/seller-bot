@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment
 
 from app.core.bot_instance import bot
-from app.keyboards.start import pay_kb, load_xl_kb
+from app.keyboards.user import pay_kb, load_xl_kb
 from app.texts import START_PAY_MSG
 from app.services.subscription_update import update_subscription_status
 from app.services.get_prices_for_pay import get_prices_for_pay
