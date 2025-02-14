@@ -1,24 +1,16 @@
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.fsm.context import FSMContext
 from aiogram import Router, F
 from aiogram.types import Message
+from aiogram.fsm.context import FSMContext
+from app.states import ReportStates
 from app.database.database import async_session
 from app.database.models import Expense, Order
 from app.core.bot_instance import bot
+from app.core.expense_categories import EXPENSE_CATEGORIES
 from app.services.notify_admins import notify_admins
-from app.states import ReportStates
+
 
 load_router = Router()
-
-# Русские названия категорий
-EXPENSE_CATEGORIES = {
-    "salaries": "Зарплаты",
-    "advertising": "Реклама вне маркетплейса",
-    "warehouse_rent": "Аренда склада",
-    "communication": "Связь/интернет",
-    "services": "Сервисы (эквайринг/комиссии банка/ПО/CRM/программы)",
-    "other": "Прочее"
-}
 
 
 @load_router.callback_query(F.data == "load_report")

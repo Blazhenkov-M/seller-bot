@@ -1,11 +1,11 @@
 from app.filters.admin_protect import SUPER_ADMINS
-from app.services import get_admins
-from app.handlers.user.load_report import EXPENSE_CATEGORIES
+from app.services.get_admins import get_admins
+from app.core.expense_categories import EXPENSE_CATEGORIES
 
 
 async def notify_admins(order_id: int, file_id: str, expenses: dict, bot):
     # Получаем список админов
-    db_admins = await get_admins.get_admins()
+    db_admins = await get_admins()
     all_admins = set(db_admins) | SUPER_ADMINS  # Объединяем с супер-админами
 
     # Формируем сообщение

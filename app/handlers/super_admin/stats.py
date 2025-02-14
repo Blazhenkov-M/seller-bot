@@ -3,9 +3,8 @@ from aiogram.types import CallbackQuery
 
 from app.filters.admin_protect import AdminProtect
 from app.keyboards.s_admin import stats_kb
-
 from app.database.database import async_session
-from app.services.stats import get_all_usernames
+from app.services.stats import get_all_usernames, calculate_conversion
 
 admin_stats = Router()
 
@@ -18,8 +17,10 @@ async def show_stats_menu(callback: CallbackQuery):
 
 @admin_stats.callback_query(AdminProtect(), F.data == "conversion")
 async def show_conversion(callback: CallbackQuery):
-    """Показывает конверсию (в будущем можно доработать)."""
-    await callback.message.answer("Конверсия")
+    """Показывает конверсию."""
+    async with async_session() as session:
+        stats = await calculate_conversion(session)
+    await callback.message.answer(stats)
 
 
 @admin_stats.callback_query(AdminProtect(), F.data == "get_all_users")
