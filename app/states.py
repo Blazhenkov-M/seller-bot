@@ -1,12 +1,6 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
-class ReportStates(StatesGroup):
-    waiting_for_file = State()
-    choosing_categories = State()
-    entering_amounts = State()
-
-
 class AddAdminState(StatesGroup):
     waiting_for_username = State()
 
@@ -29,3 +23,7 @@ class EditMessageState(StatesGroup):
     load_report = State()
 
 
+class ReportStates(StatesGroup):
+    waiting_for_file = State()
+    entering_amount = State()
+    confirmation = State()

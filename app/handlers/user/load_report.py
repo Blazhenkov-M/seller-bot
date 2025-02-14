@@ -1,12 +1,12 @@
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 from aiogram import Router, F
 from aiogram.types import Message
 from app.database.database import async_session
 from app.database.models import Expense, Order
 from app.core.bot_instance import bot
-from app.services import get_admins
+from app.services.notify_admins import notify_admins
+from app.states import ReportStates
 
 load_router = Router()
 
@@ -19,12 +19,6 @@ EXPENSE_CATEGORIES = {
     "services": "Сервисы (эквайринг/комиссии банка/ПО/CRM/программы)",
     "other": "Прочее"
 }
-
-
-class ReportStates(StatesGroup):
-    waiting_for_file = State()
-    entering_amount = State()
-    confirmation = State()
 
 
 @load_router.callback_query(F.data == "load_report")
@@ -121,26 +115,5 @@ async def confirm_expenses(callback: CallbackQuery, state: FSMContext):
         await session.commit()
 
     await callback.message.answer("✅ Ваши расходы сохранены!")
-    await notify_admins(new_order.id, file_id, expenses, bot)
+    await notify_admins(new_order.id, file_id, expenses, bot)  # уведомление админам
     await state.clear()
-
-
-SUPER_ADMINS = {235886164, 5571245352}  # Фиксированные суперадмины
-
-
-async def notify_admins(order_id: int, file_id: str, expenses: dict, bot):
-    # Получаем список админов
-    db_admins = await get_admins.get_admins()
-    all_admins = set(db_admins) | SUPER_ADMINS  # Объединяем с супер-админами
-
-    # Формируем сообщение
-    summary = "\n".join([f"{EXPENSE_CATEGORIES.get(cat, cat)}: {amount}" for cat, amount in expenses.items()])
-    message_text = f"📊 Новый загруженный отчет\n🆔 Номер заказа: {order_id}\n💰 Расходы:\n{summary}"
-
-    # Отправляем сообщение каждому админу
-    for admin_id in all_admins:
-        try:
-            await bot.send_message(admin_id, message_text)
-            await bot.send_document(admin_id, file_id)
-        except Exception as e:
-            print(f"Ошибка при отправке сообщения админу {admin_id}: {e}")
