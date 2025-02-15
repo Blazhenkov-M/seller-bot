@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
-from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment
+from aiogram.types import LabeledPrice, PreCheckoutQuery
 
 from app.core.bot_instance import bot
 from app.keyboards.user import pay_kb, load_xl_kb
