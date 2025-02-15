@@ -27,3 +27,8 @@ class ReportStates(StatesGroup):
     waiting_for_file = State()
     entering_amount = State()
     confirmation = State()
+
+
+class OrderResponse(StatesGroup):
+    waiting_for_order_number = State()
+    waiting_for_message = State()

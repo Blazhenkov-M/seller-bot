@@ -1,11 +1,9 @@
-from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Command, Filter
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
+from aiogram import Router
+from aiogram.types import Message
+from aiogram.filters import Command
 
-from filters.admin_protect import AdminProtect
-from keyboards.admin import admin_kb
+from app.filters.admin_protect import AdminProtect
+from app.keyboards.admin import admin_kb
 
 admin = Router()
 

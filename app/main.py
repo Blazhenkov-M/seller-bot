@@ -6,7 +6,7 @@ from database.init_data import initialize_data
 from core.bot_instance import bot
 
 from handlers.user import start, pay, load_report
-from handlers.admin import admin
+from handlers.admin import admin, response_to_user
 from handlers.super_admin import super_admin, edit_admins, newsletter, edit_texts, edit_prices, stats
 
 from settings.logger_config import get_logger
@@ -21,7 +21,7 @@ async def main():
     await initialize_data()
     dp = Dispatcher(storage=storage)
     dp.include_routers(start.start_router, pay.pay_router, load_report.load_router,
-                       admin.admin,
+                       admin.admin, response_to_user.admin_response,
                        super_admin.s_admin, edit_admins.s_admin_edit_admins, newsletter.admin_newsletter,
                        edit_texts.s_admin_edit_texts, edit_prices.s_admin_edit_prices, stats.admin_stats)
 
