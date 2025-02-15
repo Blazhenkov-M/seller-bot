@@ -8,6 +8,7 @@ from app.database.models import Expense, Order
 from app.core.bot_instance import bot
 from app.core.expense_categories import EXPENSE_CATEGORIES
 from app.services.notify_admins import notify_admins
+from app.keyboards.user import main_kb
 
 
 load_router = Router()
@@ -106,6 +107,7 @@ async def confirm_expenses(callback: CallbackQuery, state: FSMContext):
         session.add(new_expense)
         await session.commit()
 
-    await callback.message.answer("✅ Ваши расходы сохранены!")
+    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов",
+                                  reply_markup=main_kb)
     await notify_admins(new_order.id, file_id, expenses, bot)  # уведомление админам
     await state.clear()
