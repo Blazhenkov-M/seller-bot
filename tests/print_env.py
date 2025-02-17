@@ -1,4 +1,4 @@
-from settings.config import settings
+from app.settings.config import settings
 from app.database.models import Base
 
 # print(settings.bot_token)

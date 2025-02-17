@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     # bot token
     bot_token: SecretStr
 
+    # yookassa provider token
+    provider_token: SecretStr
+
     # db
     db_host: SecretStr
     db_port: int
