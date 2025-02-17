@@ -1,3 +1,5 @@
+import os
+import pandas as pd
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import Router, F
 from aiogram.types import Message
@@ -12,6 +14,14 @@ from app.keyboards.user import main_kb
 
 load_router = Router()
 
+VALID_COLUMNS_1 = {"предмет", "название", "баркод", "дата продажи"}
+VALID_COLUMNS_2 = {"товар", "штрих-код товара", "реализовано на сумму, руб."}
+
+
+def normalize_columns(columns):
+    """Приводит названия колонок к единому формату."""
+    return {col.strip().lower() for col in columns}
+
 
 @load_router.callback_query(F.data == "load_report")
 async def start_report(callback: CallbackQuery, state: FSMContext):
@@ -22,20 +32,31 @@ async def start_report(callback: CallbackQuery, state: FSMContext):
 @load_router.message(ReportStates.waiting_for_file, F.document)
 async def process_file_upload(msg: Message, state: FSMContext):
     file_id = msg.document.file_id
-    await state.update_data(file_id=file_id)
+    file_path = await bot.get_file(file_id)
 
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="Да", callback_data="add_extra_expenses")],
-            [InlineKeyboardButton(text="Нет", callback_data="skip_extra_expenses")]
-        ]
-    )
+    os.makedirs("temp", exist_ok=True)
+    file_name = f"temp/{msg.document.file_name}"
 
-    await msg.answer(
-        "В отчете из маркетплейса не отображены некоторые виды расходов (например, зарплаты, аренда склада, реклама вне маркетплейса, связь/интернет, сервисы и прочее). Хотите ли вы их добавить?",
-        reply_markup=keyboard
-    )
-    await state.set_state(ReportStates.asking_extra_expenses)
+    await bot.download_file(file_path.file_path, file_name)
+
+    try:
+        df = pd.read_excel(file_name, dtype=str)
+        normalized_columns = normalize_columns(df.columns)
+
+        if VALID_COLUMNS_1.issubset(normalized_columns) or VALID_COLUMNS_2.issubset(normalized_columns):
+            await state.update_data(file_id=file_id)
+            keyboard = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="Да", callback_data="add_extra_expenses")],
+                    [InlineKeyboardButton(text="Нет", callback_data="skip_extra_expenses")]
+                ]
+            )
+            await msg.answer("✅ Файл принят! Хотите добавить дополнительные расходы?", reply_markup=keyboard)
+            await state.set_state(ReportStates.asking_extra_expenses)
+        else:
+            await msg.answer("❌ Ошибка! Файл не содержит нужные колонки. Проверьте структуру файла.")
+    except Exception as e:
+        await msg.answer(f"❌ Ошибка обработки файла: {str(e)}\nУбедитесь, что это корректный .xls или .xlsx.")
 
 
 @load_router.callback_query(F.data == "add_extra_expenses")
@@ -67,7 +88,8 @@ async def skip_extra_expenses(callback: CallbackQuery, state: FSMContext):
         session.add(new_expense)
         await session.commit()
 
-    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов", reply_markup=main_kb)
+    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов",
+                                  reply_markup=main_kb)
     await notify_admins(new_order.id, file_id, {}, bot)  # уведомление админам
     await state.clear()
 
@@ -154,6 +176,7 @@ async def confirm_expenses(callback: CallbackQuery, state: FSMContext):
         session.add(new_expense)
         await session.commit()
 
-    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов", reply_markup=main_kb)
+    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов",
+                                  reply_markup=main_kb)
     await notify_admins(new_order.id, file_id, expenses, bot)
     await state.clear()
