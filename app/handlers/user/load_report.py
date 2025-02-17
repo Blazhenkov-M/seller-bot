@@ -51,7 +51,10 @@ async def process_file_upload(msg: Message, state: FSMContext):
                     [InlineKeyboardButton(text="Нет", callback_data="skip_extra_expenses")]
                 ]
             )
-            await msg.answer("✅ Файл принят! Хотите добавить дополнительные расходы?", reply_markup=keyboard)
+            await msg.answer("В отчете из маркетплейса не отображены некоторые виды расходов (например, зарплаты,"
+                             " аренда склада, реклама вне маркетплейса, связь/интернет, сервисы и прочее). Хотите ли вы"
+                             " их добавить?",
+                             reply_markup=keyboard)
             await state.set_state(ReportStates.asking_extra_expenses)
         else:
             await msg.answer("❌ Ошибка! Файл не содержит нужные колонки. Проверьте структуру файла.")
