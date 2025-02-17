@@ -25,6 +25,7 @@ class EditMessageState(StatesGroup):
 
 class ReportStates(StatesGroup):
     waiting_for_file = State()
+    asking_extra_expenses = State()
     entering_amount = State()
     confirmation = State()
 

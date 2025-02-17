@@ -10,24 +10,66 @@ from app.core.expense_categories import EXPENSE_CATEGORIES
 from app.services.notify_admins import notify_admins
 from app.keyboards.user import main_kb
 
-
 load_router = Router()
 
 
 @load_router.callback_query(F.data == "load_report")
 async def start_report(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer("📎 Загрузите ваш отчет в формате Excel (.xls или .xlsx).")
+    await callback.message.answer("\U0001F4CE Загрузите ваш отчет в формате Excel (.xls или .xlsx).")
     await state.set_state(ReportStates.waiting_for_file)
 
 
 @load_router.message(ReportStates.waiting_for_file, F.document)
 async def process_file_upload(msg: Message, state: FSMContext):
     file_id = msg.document.file_id
-    await state.update_data(file_id=file_id, expenses={}, current_category=list(EXPENSE_CATEGORIES.keys())[0])
-    await msg.answer(f"Введите сумму для {EXPENSE_CATEGORIES[list(EXPENSE_CATEGORIES.keys())[0]]}.",
-                     reply_markup=InlineKeyboardMarkup(
-                         inline_keyboard=[[InlineKeyboardButton(text="Пропустить", callback_data="skip_amount")]]))
+    await state.update_data(file_id=file_id)
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Да", callback_data="add_extra_expenses")],
+            [InlineKeyboardButton(text="Нет", callback_data="skip_extra_expenses")]
+        ]
+    )
+
+    await msg.answer(
+        "В отчете из маркетплейса не отображены некоторые виды расходов (например, зарплаты, аренда склада, реклама вне маркетплейса, связь/интернет, сервисы и прочее). Хотите ли вы их добавить?",
+        reply_markup=keyboard
+    )
+    await state.set_state(ReportStates.asking_extra_expenses)
+
+
+@load_router.callback_query(F.data == "add_extra_expenses")
+async def add_extra_expenses(callback: CallbackQuery, state: FSMContext):
+    await state.update_data(expenses={}, current_category=list(EXPENSE_CATEGORIES.keys())[0])
+    await callback.message.answer(
+        f"Введите сумму для {EXPENSE_CATEGORIES[list(EXPENSE_CATEGORIES.keys())[0]]}.",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[[InlineKeyboardButton(text="Пропустить", callback_data="skip_amount")]]
+        )
+    )
     await state.set_state(ReportStates.entering_amount)
+
+
+@load_router.callback_query(F.data == "skip_extra_expenses")
+async def skip_extra_expenses(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    file_id = data.get("file_id")
+    user_id = callback.from_user.id
+    async with async_session() as session:
+        new_order = Order(user_id=user_id)
+        session.add(new_order)
+        await session.flush()
+        new_expense = Expense(
+            user_id=user_id,
+            order_id=new_order.id,
+            **{key: 0 for key in EXPENSE_CATEGORIES}
+        )
+        session.add(new_expense)
+        await session.commit()
+
+    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов", reply_markup=main_kb)
+    await notify_admins(new_order.id, file_id, {}, bot)  # уведомление админам
+    await state.clear()
 
 
 @load_router.callback_query(F.data == "skip_amount")
@@ -64,9 +106,12 @@ async def ask_next_category(msg, state: FSMContext):
     if remaining_categories:
         next_category = remaining_categories[0]
         await state.update_data(current_category=next_category)
-        await msg.answer(f"Введите сумму для {EXPENSE_CATEGORIES[next_category]}",
-                         reply_markup=InlineKeyboardMarkup(
-                             inline_keyboard=[[InlineKeyboardButton(text="Пропустить", callback_data="skip_amount")]]))
+        await msg.answer(
+            f"Введите сумму для {EXPENSE_CATEGORIES[next_category]}",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text="Пропустить", callback_data="skip_amount")]]
+            )
+        )
     else:
         summary = "\n".join([f"{EXPENSE_CATEGORIES[cat]}: {amount}" for cat, amount in expenses.items()])
         keyboard = InlineKeyboardMarkup(
@@ -82,10 +127,12 @@ async def ask_next_category(msg, state: FSMContext):
 @load_router.callback_query(F.data == "restart_expenses")
 async def restart_expenses(callback: CallbackQuery, state: FSMContext):
     await state.update_data(expenses={}, current_category=list(EXPENSE_CATEGORIES.keys())[0])
-    await callback.message.answer(f"Введите сумму для {EXPENSE_CATEGORIES[list(EXPENSE_CATEGORIES.keys())[0]]}.",
-                                  reply_markup=InlineKeyboardMarkup(
-                                      inline_keyboard=[
-                                          [InlineKeyboardButton(text="Пропустить", callback_data="skip_amount")]]))
+    await callback.message.answer(
+        f"Введите сумму для {EXPENSE_CATEGORIES[list(EXPENSE_CATEGORIES.keys())[0]]}.",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[[InlineKeyboardButton(text="Пропустить", callback_data="skip_amount")]]
+        )
+    )
     await state.set_state(ReportStates.entering_amount)
 
 
@@ -107,7 +154,6 @@ async def confirm_expenses(callback: CallbackQuery, state: FSMContext):
         session.add(new_expense)
         await session.commit()
 
-    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов",
-                                  reply_markup=main_kb)
-    await notify_admins(new_order.id, file_id, expenses, bot)  # уведомление админам
+    await callback.message.answer("✅ Ваши расходы сохранены! Ожидайте ответа в течении 72 часов", reply_markup=main_kb)
+    await notify_admins(new_order.id, file_id, expenses, bot)
     await state.clear()
