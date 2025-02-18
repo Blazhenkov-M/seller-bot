@@ -11,6 +11,7 @@ from app.database.models import Expense, Order
 from app.core.bot_instance import bot
 from app.core.expense_categories import EXPENSE_CATEGORIES
 from app.services.notify_admins import notify_admins
+from app.services.get_texts import get_text
 from app.keyboards.user import main_kb
 
 load_router = Router()
@@ -63,7 +64,10 @@ def contains_valid_keywords(df):
 
 @load_router.callback_query(F.data == "load_report")
 async def start_report(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer("\U0001F4CE Загрузите ваш отчет в формате Excel (.xls или .xlsx).")
+    async with async_session() as session:
+        load_report_msg = await get_text(session, "load_report")  # Загружаем текст из БД
+
+    await callback.message.answer(load_report_msg)
     await state.set_state(ReportStates.waiting_for_file)
 
 
