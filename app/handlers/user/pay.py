@@ -51,8 +51,8 @@ async def successful_payment_handler(msg: Message):
     transaction_id = payment_info.provider_payment_charge_id  # ID транзакции в ЮKassa
     user_id = msg.from_user.id  # Telegram ID пользователя
 
-    async with async_session() as session:  # Используем async_session из твоего кода
+    async with async_session() as session:
         await update_subscription_status(user_id, session)
-
-    await msg.answer(f"✅ Оплата прошла успешно!\nID транзакции: {transaction_id}")
+    print(transaction_id)
+    await msg.answer(f"✅ Оплата прошла успешно!")
     await msg.answer("Загрузите отчет с маркетплейса", reply_markup=load_xl_kb)
