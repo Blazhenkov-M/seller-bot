@@ -76,6 +76,7 @@ class Expense(Base):
     warehouse_rent: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     communication: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     services: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
+    loan_repayment: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     other: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     date: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
