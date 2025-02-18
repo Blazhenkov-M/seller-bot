@@ -1,4 +1,5 @@
 import os
+import re
 import pandas as pd
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import Router, F
@@ -14,13 +15,50 @@ from app.keyboards.user import main_kb
 
 load_router = Router()
 
-VALID_COLUMNS_1 = {"предмет", "название", "баркод", "дата продажи"}
-VALID_COLUMNS_2 = {"товар", "штрих-код товара", "реализовано на сумму, руб."}
+VALID_KEYWORDS_1 = {"Номер поставки", "Предмет", "Код номенклатуры", "дата продажи"}
+VALID_KEYWORDS_2 = {"товар", "штрих-код товара"}
 
 
-def normalize_columns(columns):
-    """Приводит названия колонок к единому формату."""
-    return {col.strip().lower() for col in columns}
+def clean_text(text):
+    """Очищает текст от пробелов, невидимых символов и приводит к нижнему регистру."""
+    text = str(text).strip().lower()
+    text = re.sub(r"\s+", " ", text)  # Убираем двойные пробелы
+    text = text.replace("\xa0", " ")  # Убираем неразрывные пробелы
+    return text
+
+
+def find_header_row(df):
+    """Ищет строку, где находятся заголовки."""
+    valid_keywords_lower = {kw.lower().strip() for kw in VALID_KEYWORDS_1 | VALID_KEYWORDS_2}
+
+    best_row = -1
+    max_hits = 0
+
+    for i in range(min(20, len(df))):  # Проверяем первые 20 строк (на всякий случай)
+        row_values = {clean_text(str(val)) for val in df.iloc[i].dropna().values}
+        matches = len(valid_keywords_lower & row_values)  # Сколько совпадений
+
+        if matches > max_hits:
+            max_hits = matches
+            best_row = i
+
+    return best_row if max_hits > 0 else None  # Если вообще ничего не нашли, вернем None
+
+
+def contains_valid_keywords(df):
+    """Проверяет, содержатся ли ключевые слова в заголовках таблицы."""
+    headers = {clean_text(col) for col in df.columns}
+
+    valid_keywords_1_lower = {kw.lower().strip() for kw in VALID_KEYWORDS_1}
+    valid_keywords_2_lower = {kw.lower().strip() for kw in VALID_KEYWORDS_2}
+
+    found_1 = [kw for kw in valid_keywords_1_lower if kw in headers]
+    found_2 = [kw for kw in valid_keywords_2_lower if kw in headers]
+
+    print("Найденные ключевые слова из VALID_KEYWORDS_1:", found_1)
+    print("Найденные ключевые слова из VALID_KEYWORDS_2:", found_2)
+
+    return bool(found_1 or found_2)
 
 
 @load_router.callback_query(F.data == "load_report")
@@ -40,10 +78,20 @@ async def process_file_upload(msg: Message, state: FSMContext):
     await bot.download_file(file_path.file_path, file_name)
 
     try:
-        df = pd.read_excel(file_name, dtype=str)
-        normalized_columns = normalize_columns(df.columns)
+        df = pd.read_excel(file_name, dtype=str, header=None)  # Загружаем без заголовков
 
-        if VALID_COLUMNS_1.issubset(normalized_columns) or VALID_COLUMNS_2.issubset(normalized_columns):
+        header_row = find_header_row(df)
+        if header_row is None:
+            await msg.answer("❌ Ошибка! Не удалось найти заголовки в файле. Проверьте его структуру.")
+            return
+
+        df.columns = df.iloc[header_row]  # Используем найденную строку как заголовки
+        df = df.iloc[header_row + 1:].reset_index(drop=True)  # Убираем все строки выше
+
+        print("Формат колонок после загрузки:", df.columns.tolist())  # Логирование заголовков
+        print("Первые строки таблицы:\n", df.head(5))
+
+        if contains_valid_keywords(df):
             await state.update_data(file_id=file_id)
             keyboard = InlineKeyboardMarkup(
                 inline_keyboard=[
@@ -51,13 +99,13 @@ async def process_file_upload(msg: Message, state: FSMContext):
                     [InlineKeyboardButton(text="Нет", callback_data="skip_extra_expenses")]
                 ]
             )
-            await msg.answer("В отчете из маркетплейса не отображены некоторые виды расходов (например, зарплаты,"
-                             " аренда склада, реклама вне маркетплейса, связь/интернет, сервисы и прочее). Хотите ли вы"
-                             " их добавить?",
-                             reply_markup=keyboard)
+            await msg.answer(
+                "В отчете из маркетплейса не отображены некоторые виды расходов (например, зарплаты, аренда "
+                "склада, реклама вне маркетплейса, связь/интернет, сервисы и прочее). Хотите ли вы их добавить?",
+                reply_markup=keyboard)
             await state.set_state(ReportStates.asking_extra_expenses)
         else:
-            await msg.answer("❌ Ошибка! Файл не содержит нужные колонки. Проверьте структуру файла.")
+            await msg.answer("❌ Ошибка! Файл не содержит нужные данные. Проверьте структуру файла.")
     except Exception as e:
         await msg.answer(f"❌ Ошибка обработки файла: {str(e)}\nУбедитесь, что это корректный .xls или .xlsx.")
 
