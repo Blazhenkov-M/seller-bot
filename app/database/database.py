@@ -12,6 +12,7 @@ engine = create_async_engine(url=settings.sqlalchemy_database_url,
                              echo=False,
                              future=True,
                              connect_args={"server_settings": {"timezone": "UTC"}},
+                             execution_options={"isolation_level": "READ COMMITTED"},
                              pool_size=10,
                              max_overflow=10)
 
